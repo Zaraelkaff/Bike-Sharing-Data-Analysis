@@ -44,8 +44,8 @@ def make_bar_Plot(df_x,df_y,labelx=None,labely=None,labelrotation=0):
     st.pyplot(figx)
 
 # Baca File csv
-day_df = pd.read_csv("day_clean.csv")
-hour_df = pd.read_csv("hour_clean.csv")
+day_df = pd.read_csv("dashboard/day_clean.csv")
+hour_df = pd.read_csv("dashboard/hour_clean.csv")
 
 # mengolah data
 day_df.sort_values(by="rental_date", inplace=True)
