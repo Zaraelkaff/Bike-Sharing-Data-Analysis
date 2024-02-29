@@ -9,7 +9,7 @@ python -m venv NamaEnv
 ```
 ## Install Library
 ```
-pip install pandas streamlit matplotlib
+pip install pandas streamlit matplotlib seaborn numpy
 ```
 
 ## Run steamlit app
