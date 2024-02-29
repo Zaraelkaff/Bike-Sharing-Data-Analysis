@@ -2,6 +2,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import streamlit as st
 
+# Fungsi Label di plot bar
+def addlabels(x,y):
+    for i in range(len(x)):
+        plt.text(i, y[i], y[i], ha = 'center')
+
 # Fungsi untuk menghitung total pemesanan masing-masing user
 def cnt_user(df):
     casual = df['casual'].sum()
@@ -41,6 +46,7 @@ def make_bar_Plot(df_x,df_y,labelx=None,labely=None,labelrotation=0):
     ax.tick_params(axis='x', labelsize=10,rotation=labelrotation)
     ax.set_ylabel(labely)
     ax.set_xlabel(labelx)
+    addlabels(df_x,df_y)
     st.pyplot(figx)
 
 # Baca File csv
