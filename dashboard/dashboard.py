@@ -77,6 +77,7 @@ st.markdown("""---""")
 # Membuat Grafik pemesanan harian
 st.header('Daily Rentals :date:')
 tab1, tab2, tab3 = st.tabs(["ALL","holiday", "working day"])
+# Grafik jumlah rental di semua hari (sesuai rentang yang diinput)
 with tab1:
     casual,registered,count = cnt_user(main_day_df)
     col1, col2, col3 = st.columns(3)
@@ -90,6 +91,8 @@ with tab1:
         st.write("Count")
         st.subheader(count)
     make_Line_Plot(main_day_df['rental_date'],main_day_df['count'],None,None,45) 
+
+# Grafik jumlah rental di hari libur (sesuai rentang yang diinput)
 with tab2:
     df_holiday = main_day_df[main_day_df['holiday']==1]
     casual,registered,count = cnt_user(df_holiday)
@@ -104,6 +107,8 @@ with tab2:
         st.write("Count")
         st.subheader(count)
     make_Line_Plot(df_holiday['rental_date'],df_holiday['count'],None,None,45)
+
+# Grafik jumlah rental di hari kerja (sesuai rentang yang diinput)
 with tab3:
     df_workday = main_day_df[main_day_df['workingday']==1]
     casual,registered,count = cnt_user(df_workday)
@@ -119,11 +124,12 @@ with tab3:
         st.subheader(count)
     make_Line_Plot(df_workday['rental_date'],df_workday['count'],None,None,45)
 
-# Membuat Grafik pemesanan berdasarkan kategori waktu
+# Membuat Grafik pemesanan berdasarkan kategori waktu (Pagi, Siang, Sore, Malam)
 st.markdown("""---""")
 st.header('Hourly Rentals :clock1:')
 tab1, tab2, tab3 = st.tabs(["ALL","holiday", "working day"])
 
+# Grafik jumlah rental di semua hari (sesuai rentang yang diinput)
 with tab1:
     st.subheader("Count User")
     col1, col2, col3 = st.columns([1,1,2])
@@ -137,6 +143,8 @@ with tab1:
         st.metric(label="Night", value=Night)
     with col3:
         make_bar_Plot(hourly_cnt_df["time_category"],hourly_cnt_df["count"],None,'count',45)
+
+# Grafik jumlah rental di hari libur (sesuai rentang yang diinput)
 with tab2:
     st.subheader("Count User")
     col1, col2, col3 = st.columns([1,1,2])
@@ -151,6 +159,8 @@ with tab2:
         st.metric(label="Night", value=Night)
     with col3:
         make_bar_Plot(hourly_cnt_df["time_category"],hourly_cnt_df["count"],None,'count',45)
+
+# Grafik jumlah rental di hari kerja (sesuai rentang yang diinput)
 with tab3:
     st.subheader("Count User")
     col1, col2, col3 = st.columns([1,1,2])
@@ -168,11 +178,8 @@ with tab3:
 
 # Membuat Grafik korelasi temperature dan count rental
 st.markdown("""---""")
-
-
 st.header('Temperature Correlation :thermometer:')
 col1,col2=st.columns([7,1])
-
 with col1:
     fig, ax = plt.subplots(figsize=(10, 3))
     ax.scatter(x=main_day_df['temp'],  y=main_day_df['count'])
