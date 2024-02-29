@@ -1,6 +1,8 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import streamlit as st
+import numpy as np
+import seaborn as sns
 
 # Fungsi Label di plot bar
 def addlabels(x,y):
@@ -50,8 +52,8 @@ def make_bar_Plot(df_x,df_y,labelx=None,labely=None,labelrotation=0):
     st.pyplot(figx)
 
 # Baca File csv
-day_df = pd.read_csv("dashboard/day_clean.csv")
-hour_df = pd.read_csv("dashboard/hour_clean.csv")
+day_df = pd.read_csv("day_clean.csv")
+hour_df = pd.read_csv("hour_clean.csv")
 
 # mengolah data
 day_df.sort_values(by="rental_date", inplace=True)
@@ -63,7 +65,7 @@ hour_df['rental_date'] = pd.to_datetime(hour_df['rental_date'])
 min_date = hour_df["rental_date"].min()
 max_date = hour_df["rental_date"].max()
 with st.sidebar:
-    st.image("dashboard/logo.png")
+    st.image("logo.png")
 
     # Membuat filter rentang tanggal
     start_date, end_date = st.date_input(
@@ -97,7 +99,6 @@ with tab1:
         st.write("Count")
         st.subheader(count)
     make_Line_Plot(main_day_df['rental_date'],main_day_df['count'],None,None,45) 
-
 # Grafik jumlah rental di hari libur (sesuai rentang yang diinput)
 with tab2:
     df_holiday = main_day_df[main_day_df['holiday']==1]
@@ -113,7 +114,6 @@ with tab2:
         st.write("Count")
         st.subheader(count)
     make_Line_Plot(df_holiday['rental_date'],df_holiday['count'],None,None,45)
-
 # Grafik jumlah rental di hari kerja (sesuai rentang yang diinput)
 with tab3:
     df_workday = main_day_df[main_day_df['workingday']==1]
@@ -134,7 +134,6 @@ with tab3:
 st.markdown("""---""")
 st.header('Hourly Rentals :clock1:')
 tab1, tab2, tab3 = st.tabs(["ALL","holiday", "working day"])
-
 # Grafik jumlah rental di semua hari (sesuai rentang yang diinput)
 with tab1:
     st.subheader("Count User")
@@ -148,8 +147,9 @@ with tab1:
         st.metric(label="Evening", value=Evening)
         st.metric(label="Night", value=Night)
     with col3:
+        hourly_cnt_df.sort_values(by='count', ascending=False,inplace=True)
+        hourly_cnt_df=hourly_cnt_df.reset_index()
         make_bar_Plot(hourly_cnt_df["time_category"],hourly_cnt_df["count"],None,'count',45)
-
 # Grafik jumlah rental di hari libur (sesuai rentang yang diinput)
 with tab2:
     st.subheader("Count User")
@@ -164,8 +164,9 @@ with tab2:
         st.metric(label="Evening", value=Evening)
         st.metric(label="Night", value=Night)
     with col3:
+        hourly_cnt_df.sort_values(by='count', ascending=False,inplace=True)
+        hourly_cnt_df=hourly_cnt_df.reset_index()
         make_bar_Plot(hourly_cnt_df["time_category"],hourly_cnt_df["count"],None,'count',45)
-
 # Grafik jumlah rental di hari kerja (sesuai rentang yang diinput)
 with tab3:
     st.subheader("Count User")
@@ -180,7 +181,57 @@ with tab3:
         st.metric(label="Evening", value=Evening)
         st.metric(label="Night", value=Night)
     with col3:
+        hourly_cnt_df.sort_values(by='count', ascending=False,inplace=True)
+        hourly_cnt_df=hourly_cnt_df.reset_index()
         make_bar_Plot(hourly_cnt_df["time_category"],hourly_cnt_df["count"],None,'count',45)
+
+
+# Membuat Grafik pemesanan berdasarkan kategori musim
+st.markdown("""---""")
+st.header('Seasonly Rentals 🍂')
+
+season_rental = main_day_df[['count','season']].groupby(by='season').sum().reset_index()
+season_map = {1: 'springer', 2: 'summer', 3: 'fall', 4: 'winter'}
+season_rental['season'] = season_rental['season'].map(season_map)
+season_rental.sort_values(by='count', ascending=False,inplace=True)
+season_rental = season_rental.reset_index()
+col1, col2, col3 = st.columns([1,4,1])
+with col2:
+    make_bar_Plot(season_rental["season"],season_rental["count"],None,'count',45)
+
+# Membuat Grafik perbandingan pemesanan pada hari kerja dan libur
+st.markdown("""---""")
+st.header('Rental in Holiday vs Workingday')
+tab1, tab2 = st.tabs(["by time","by user"])
+with tab1:
+    col1, col2,col3 = st.columns([1,5,1])
+    with col2:
+        time_rental = main_hour_df[['time_category','count','workingday']].groupby(['workingday','time_category']).sum().reset_index()
+        time_order = ['Morning', 'Afternoon', 'Evening', 'Night']
+        time_rental['time_category'] = pd.Categorical(time_rental['time_category'], categories=time_order, ordered=True)
+        fig, ax = plt.subplots()
+        ax = sns.barplot(x='workingday', y='count', hue='time_category', data=time_rental, )
+        for p in ax.patches:
+            ax.annotate(str(p.get_height()), (p.get_x() + p.get_width() / 2., p.get_height()), ha='center', va='center', xytext=(0, 10), textcoords='offset points')
+        plt.xlabel(None)
+        plt.ylabel('Total')
+        plt.xticks([1, 0], ['Workingday', 'Holiday'], rotation=0)
+        plt.legend(loc='upper left')
+        st.pyplot(fig)
+with tab2:
+    col1, col2,col3 = st.columns([1,5,1])
+    with col2:
+        workingday_rental = main_day_df[['workingday','casual','registered','count']].groupby(by='workingday').sum().reset_index()
+        fig, ax = plt.subplots()
+        ax = workingday_rental.plot(kind='bar', x='workingday', y=['casual', 'registered', 'count'], ax=ax)
+        for p in ax.patches:
+            ax.annotate(str(p.get_height()), (p.get_x() + p.get_width() / 2., p.get_height()), ha='center', va='center', xytext=(0, 10), textcoords='offset points')
+        plt.ylabel('Total')
+        plt.xlabel(None)
+        plt.xticks([1, 0], ['Workingday', 'Holiday'], rotation=0)
+        plt.legend(['Casual', 'Registered', 'count'])
+        st.pyplot(fig)
+
 
 # Membuat Grafik korelasi temperature dan count rental
 st.markdown("""---""")
