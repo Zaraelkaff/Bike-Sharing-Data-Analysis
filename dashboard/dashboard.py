@@ -57,7 +57,7 @@ hour_df['rental_date'] = pd.to_datetime(hour_df['rental_date'])
 min_date = hour_df["rental_date"].min()
 max_date = hour_df["rental_date"].max()
 with st.sidebar:
-    st.image("logo.png")
+    st.image("dashboard/logo.png")
 
     # Membuat filter rentang tanggal
     start_date, end_date = st.date_input(
